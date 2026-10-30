@@ -1,11 +1,8 @@
 package np.project.bookname;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,32 +10,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BooknameApplication {
 
-	@Autowired
-	private booknamerepository repository;
+	private final BooknameRepository booknameRepository;
 
-
-	private String bookname = "吾輩は猫である";
-	private String author = "夏目漱石";
-	private int published_year = 1905;
+	public BooknameApplication(BooknameRepository booknameRepository) {
+		this.booknameRepository = booknameRepository;
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(BooknameApplication.class, args);
 	}
 
-	@GetMapping ("/booknameInfo")
-	public String booknames() {
-		return "題名：" + bookname + " " + "<br>" +
-				"作者："+ author + " " + "<br>" +
-				"出版年："+ published_year + "年" + "<br>" +
-				"--------------------------------------------------";
+	@GetMapping("/booknameInfo")
+	public String booknameInfo(@RequestParam String author) {
+		Bookname book = booknameRepository.searchByAuthor(author);
+
+		if (book == null) {
+			return "該当する本が見つかりません";
+		}
+
+		return "題名：" + book.getBookname() + "<br>"
+				+ "作者：" + book.getAuthor() + "<br>"
+				+ "ふりがな：" + book.getKanaName() + "<br>"
+				+ "出版年：" + book.getPublishedYear() + "年<br>"
+				+ "出身地：" + book.getBirthplace() + "<br>"
+				+ "没年月日：" + book.getDeathDate() + "<br>"
+				+ "死亡年齢：" + book.getDeathAge() + "<br>"
+				+ "死因：" + book.getCauseOfDeath();
 	}
-
-	@PostMapping("/booknameInfo")
-	public void setBookname(String bookname, String author, int published_year) {
-		this.bookname = bookname;
-		this.author = author;
-		this.published_year = published_year;
-	}
-
-
 }
